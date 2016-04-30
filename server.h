@@ -3,6 +3,7 @@
 
 #include <QThread>
 
+
 class Server : public QThread
 {
 Q_OBJECT
@@ -13,6 +14,9 @@ signals:
         QString send(QString msg);
 };
 
+
+
+/*
 const int NR_PRT = 32;
 const int LEN_PRT_NAME = 32;
 
@@ -23,5 +27,5 @@ struct Msg {
     int nr_prt;
     char prt_name[NR_PRT][LEN_PRT_NAME];
 };
-
+*/
 #endif // SERVER_H

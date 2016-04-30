@@ -3,13 +3,13 @@
 #include <QVector>
 #include <QString>
 
-cupsutil::cupsutil()
+CupsUtil::CupsUtil()
 {
-    int job_id;
+    //int job_id;
     //job_id = cupsPrintFile("", "/home/cww/Desktop/test2")
 }
 
-QVector<QString> cupsutil::getDests() {
+QVector<QString> CupsUtil::getDests() {
     QVector<QString> ret;
     cups_dest_t *dests;
     int num_dests = cupsGetDests(&dests);
@@ -22,7 +22,7 @@ QVector<QString> cupsutil::getDests() {
     return ret;
 }
 
-int cupsutil::printFile(const char *name, const char *filename, const char *title,
+int CupsUtil::printFile(const char *name, const char *filename, const char *title,
                         int num_options, cups_option_t *options) {
     int job_id;
     job_id = cupsPrintFile(name, filename, title, num_options, options);

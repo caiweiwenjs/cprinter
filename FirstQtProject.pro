@@ -22,14 +22,20 @@ SOURCES += main.cpp\
     server.cpp \
     sqlhelper.cpp \
     prtselectdialog.cpp \
-    cupsutil.cpp
+    cupsutil.cpp \
+    unixutil.cpp \
+    codeengine.cpp \
+    protocol.cpp
 
 HEADERS  += mainwindow.h \
     unixsocket.h \
     server.h \
     sqlhelper.h \
     prtselectdialog.h \
-    cupsutil.h
+    cupsutil.h \
+    unixutil.h \
+    codeengine.h \
+    protocol.h
 
 FORMS    += mainwindow.ui \
     prtselectdialog.ui
