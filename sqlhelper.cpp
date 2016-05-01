@@ -88,3 +88,19 @@ QVector<UserPrinter> SqlHelper::getUserPrinterByUserName(QString userName) {
     return res;
 }
 
+bool SqlHelper::addPrintLog(const PrintLog &printLog) {
+    QString fmt = "insert into print_log(status, user_name, printer_name, file_name, title, options, copies, submit_time, print_time) values(%1, '%2', '%3', '%4', '%5', '%6', %7, '%8', '%9');";
+    QString sql = fmt.arg(printLog.getStatus()).
+                          arg(printLog.getUserName()).
+                          arg(printLog.getPrinterName()).
+                          arg(printLog.getFileName()).
+                          arg(printLog.getTitle()).
+                          arg(printLog.getOptions()).
+                          arg(printLog.getCopies()).
+                          arg(printLog.getSubmitTime().toString("yyyy-MM-dd hh:mm:ss")).
+                          arg(printLog.getPrintTime().toString("yyyy-MM-dd hh:mm:ss"));
+    //qDebug() << sql;
+    return exec(sql);
+    //return true;
+}
+

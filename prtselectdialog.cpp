@@ -1,6 +1,7 @@
 #include "prtselectdialog.h"
 #include "ui_prtselectdialog.h"
 #include "sqlhelper.h"
+#include "unixutil.h"
 
 PrtSelectDialog::PrtSelectDialog(QWidget *parent) :
     QDialog(parent),
@@ -9,9 +10,10 @@ PrtSelectDialog::PrtSelectDialog(QWidget *parent) :
     ui->setupUi(this);
 
     SqlHelper *sqlHelper = SqlHelper::GetInstance();
-    QVector<QVector<QVariant> > res = sqlHelper->exec("select printer_name from user_printer;", 1);
-    for (auto i : res) {
-        ui->listWidget->addItem(i[0].toString());
+    QVector<UserPrinter> userPrinters = sqlHelper->getUserPrinterByUserName(UnixUtil::getUserName());
+    //QVector<QVector<QVariant> > res = sqlHelper->exec("select printer_name from user_printer;", 1);
+    for (auto i : userPrinters) {
+        ui->listWidget->addItem(i.getPrinterName());
         //ui->listWidget->addItem(i[1].toString());
     }
 }

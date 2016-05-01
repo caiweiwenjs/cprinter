@@ -29,3 +29,11 @@ int CupsUtil::printFile(const char *name, const char *filename, const char *titl
     return job_id;
 }
 
+int CupsUtil::parseOptions(const char *arg, cups_option_t **options) {
+    return cupsParseOptions(arg, 0, options);
+}
+
+void CupsUtil::freeOptions(int num_options, cups_option_t *options) {
+    cupsFreeOptions(num_options, options);
+}
+

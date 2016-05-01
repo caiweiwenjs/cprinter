@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QStringList header;
     ui->tableWidget->setColumnCount(10);
     ui->tableWidget->setRowCount(10);
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
     header << "id" << "status" << "userName" << "printerName" << "fileName" << "title" << "options" << "copies" << "submitTime" << "printTime";
     ui->tableWidget->setHorizontalHeaderLabels(header);
@@ -45,22 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->setItem(i, 9, new QTableWidgetItem(printLogs[i].getPrintTime().toString("yyyy-MM-dd hh:mm:ss")));
     }
     ui->tableWidget->show();
-    /*
-    JobMsg jobMsg, jobMsg2;
-    strcpy(jobMsg.title, "title1");
-    strcpy(jobMsg.options, "options1");
-    strcpy(jobMsg.copies, "copies1");
-    char buf[1024];
-    uint32_t len = jobMsg.encode(buf);
-    jobMsg2.decode(buf);
-    qDebug() << len;
-    for (int i = 0;i < len;i++) {
-        qDebug() << (int)buf[i];
-    }
-    qDebug() << jobMsg2.title;
-    qDebug() << jobMsg2.options;
-    qDebug() << jobMsg2.copies;
-    */
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +55,6 @@ MainWindow::~MainWindow()
 }
 
 QString MainWindow::test_server(QString msg) {
-
     PrtSelectDialog *dialog = new PrtSelectDialog();
     dialog->setWindowTitle("select a printer");
     dialog->exec();
@@ -80,12 +65,34 @@ QString MainWindow::test_server(QString msg) {
 
 void MainWindow::on_pushButton_clicked()
 {
-    QList <QListWidgetItem *> ql = ui->listWidget->selectedItems();
+    QList <QTableWidgetItem *> ql = ui->tableWidget->selectedItems();
+    int row = -1;
+    if (ql.size() > 0)
+        row = ql[0]->row();
+    if (row != -1) {
+        QString printerName = ui->tableWidget->item(row, 3)->text();
+        QString fileName = ui->tableWidget->item(row, 4)->text();
+        QString title = ui->tableWidget->item(row, 5)->text();
+        QString str_options = ui->tableWidget->item(row, 6)->text();
+        //qDebug() << str_options;
+        cups_option_t *options;
+        int num_options = CupsUtil::parseOptions(str_options.toStdString().c_str(), &options);
+        //qDebug() << num_options;
+        int job_id = CupsUtil::printFile(printerName.toStdString().c_str(),
+                                         fileName.toStdString().c_str(),
+                                         title.toStdString().c_str(),
+                                         num_options, options);
+        CupsUtil::freeOptions(num_options, options);
+    } else {
+        //select a row
+    }
+    //qDebug() << row;
+    /*
     QDialog *dialog = new QDialog();
     for (auto i : ql) {
         dialog->setWindowTitle(i->text());
         dialog->show();
-    }
-    int job_id = CupsUtil::printFile("Brother_HL-1208_Printer:4", "/home/cww/Desktop/test2", "my_title", 0, NULL);
+    }*/
+    //int job_id = CupsUtil::printFile("Brother_HL-1208_Printer:4", "/home/cww/Desktop/test2", "my_title", 0, NULL);
     //qDebug() << job_id;
 }

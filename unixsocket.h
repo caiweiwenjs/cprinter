@@ -15,7 +15,7 @@ private:
     int unix_socket_send(int fd,const char *buf, int buf_len);//0:success;!=0:failed
 
     const int MIN_MSG_LEN = 1;
-    const int MAX_MSG_LEN = 64;
+    const int MAX_MSG_LEN = 1024;
 public:
     UNIXSocket();
     int waitClient(uid_t *uidptr);

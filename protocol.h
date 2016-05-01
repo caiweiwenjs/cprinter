@@ -10,6 +10,9 @@ public:
     char options[MAXL];
     char copies[MAXL];
 
+    JobMsg();
+    JobMsg(char *title, char *options, char *copies);
+    JobMsg(char *buf);
     uint32_t encode(char *buf);
     void decode(char *buf);
 };

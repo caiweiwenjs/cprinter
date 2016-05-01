@@ -29,6 +29,7 @@ public:
     //table API
     QVector<PrintLog> getPrintLogByUserName(QString userName);
     QVector<UserPrinter> getUserPrinterByUserName(QString userName);
+    bool addPrintLog(const PrintLog &printLog);
 };
 
 //table print_log
@@ -60,15 +61,26 @@ public:
         printTime(_printTime) {}
 
     int getId() { return id; }
+    int getId() const { return id; }
     int getStatus() { return status; }
+    int getStatus() const { return status; }
     QString getUserName() { return userName; }
+    QString getUserName() const { return userName; }
     QString getPrinterName() { return printerName; }
+    QString getPrinterName() const { return printerName; }
     QString getFileName() { return fileName; }
+    QString getFileName() const { return fileName; }
     QString getTitle() { return title; }
+    QString getTitle() const { return title; }
     QString getOptions() { return options; }
+    QString getOptions() const { return options; }
     int getCopies() { return copies; }
+    int getCopies() const { return copies; }
     QDateTime getSubmitTime() { return submitTime; }
+    QDateTime getSubmitTime() const { return submitTime; }
     QDateTime getPrintTime() { return printTime; }
+    QDateTime getPrintTime() const { return printTime; }
+
     void setId(int id) { this->id = id; }
     void setStatus(int status) { this->status = status; }
     void setUserName(QString userName) { this->userName = userName; }
@@ -92,7 +104,9 @@ public:
     explicit UserPrinter(QString _userName, QString _printerName) : userName(_userName), printerName(_printerName) {}
 
     QString getUserName() { return userName; }
+    QString getUserName() const { return userName; }
     QString getPrinterName() { return printerName;}
+    QString getPrinterName() const { return printerName;}
     void setUserName(QString userName) { this->userName = userName; }
     void serPrinterName(QString printerName) { this->printerName = printerName;}
 };
