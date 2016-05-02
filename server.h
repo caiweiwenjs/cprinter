@@ -11,7 +11,8 @@ public:
     Server();
     virtual void run();
 signals:
-        QString send(QString msg);
+        QString signal_getPrinterName(QString msg);
+        void signal_updatePrintLog();
 };
 
 

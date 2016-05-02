@@ -18,16 +18,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     SqlHelper *sqlHelper = SqlHelper::GetInstance();
-    QVector<PrintLog> printLogs = sqlHelper->getPrintLogByUserName(UnixUtil::getUserName());
     QVector<UserPrinter> userPrinters = sqlHelper->getUserPrinterByUserName(UnixUtil::getUserName());
     for (auto row : userPrinters) {
         ui->listWidget->addItem(row.getPrinterName());
     }
     //ui->tableWidget->setWindowTitle("QTableWidget & Item");
     //ui->tableWidget->resize(350, 200);  //设置表格
+    slot_updatePrintLog();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::slot_updatePrintLog() {
+    SqlHelper *sqlHelper = SqlHelper::GetInstance();
+    QVector<PrintLog> printLogs = sqlHelper->getPrintLogByUserName(UnixUtil::getUserName());
     QStringList header;
     ui->tableWidget->setColumnCount(10);
-    ui->tableWidget->setRowCount(10);
+    ui->tableWidget->setRowCount(100);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
@@ -49,12 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->show();
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-QString MainWindow::test_server(QString msg) {
+QString MainWindow::slot_getPrinterName(QString msg) {
     PrtSelectDialog *dialog = new PrtSelectDialog();
     dialog->setWindowTitle("select a printer");
     dialog->exec();

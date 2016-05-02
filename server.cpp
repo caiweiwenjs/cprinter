@@ -20,7 +20,7 @@ void Server::run() {
         uid_t uid;
         int fd = us->waitClient(&uid);
         QString str = QString::number(uid);
-        QString prt_name = emit send(str);
+        QString prt_name = emit signal_getPrinterName(str);
         us->sendMsg(fd, prt_name.toStdString().c_str(), prt_name.length() + 1);
         us->recvMsg(fd, rbuf);
         JobMsg jobMsg(rbuf);
@@ -28,6 +28,7 @@ void Server::run() {
                                         QString(jobMsg.title), QString(jobMsg.options), QString(jobMsg.copies).toInt(),
                                         QDateTime::currentDateTime(),
                                         QDateTime::fromString("1970-01-01 00:00:00", "yyyy-MM-dd hh:mm:ss")));
+        emit signal_updatePrintLog();
         //qDebug("%s\n", jobMsg.title);
         //qDebug("%s\n", jobMsg.options);
         //qDebug("%s\n", jobMsg.copies);

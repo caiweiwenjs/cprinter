@@ -17,7 +17,8 @@ public:
 
 private slots:
     void on_pushButton_clicked();
-    QString test_server(QString msg);
+    QString slot_getPrinterName(QString msg);
+    void slot_updatePrintLog();
 private:
     Ui::MainWindow *ui;
 
