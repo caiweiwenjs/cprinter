@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     cupsutil.cpp \
     unixutil.cpp \
     codeengine.cpp \
-    protocol.cpp
+    protocol.cpp \
+    upload.cpp
 
 HEADERS  += mainwindow.h \
     unixsocket.h \
@@ -35,7 +36,8 @@ HEADERS  += mainwindow.h \
     cupsutil.h \
     unixutil.h \
     codeengine.h \
-    protocol.h
+    protocol.h \
+    upload.h
 
 FORMS    += mainwindow.ui \
     prtselectdialog.ui

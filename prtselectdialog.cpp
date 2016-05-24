@@ -29,7 +29,6 @@ QString PrtSelectDialog::getPtrName() {
 
 void PrtSelectDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
-    //qDebug() << "132";
     QList <QListWidgetItem *> ql = ui->listWidget->selectedItems();
     if (ql.size() <= 0) {
         QDialog *dialog = new QDialog();
@@ -38,8 +37,6 @@ void PrtSelectDialog::on_buttonBox_clicked(QAbstractButton *button)
         delete dialog;
         return ;
     }
-    //qDebug() << "132";
-    //qDebug() << ql[0]->text();
 
     if (ui->buttonBox->button(QDialogButtonBox::Ok) == (QPushButton *)button) {
         prt_name = ql[0]->text();

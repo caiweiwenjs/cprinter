@@ -21,21 +21,18 @@ void Server::run() {
         int fd = us->waitClient(&uid);
         QString str = QString::number(uid);
         QString prt_name = emit signal_getPrinterName(str);
+        if (prt_name == "") {//discard selecting printer
+            continue ;
+        }
         us->sendMsg(fd, prt_name.toStdString().c_str(), prt_name.length() + 1);
         us->recvMsg(fd, rbuf);
         JobMsg jobMsg(rbuf);
-        sqlHelper->addPrintLog(PrintLog(-1, 0, UnixUtil::getUserName(), prt_name, "/var/spool/cups-pdf/" + UnixUtil::getUserName() + "/" + QString(jobMsg.title) + ".pdf",
+        QString filename = emit signal_uploadPDF(QString(jobMsg.title) + ".pdf");
+        sqlHelper->addPrintLog(PrintLog(-1, 0, UnixUtil::getUserName(), prt_name, filename,
                                         QString(jobMsg.title), QString(jobMsg.options), QString(jobMsg.copies).toInt(),
                                         QDateTime::currentDateTime(),
                                         QDateTime::fromString("1970-01-01 00:00:00", "yyyy-MM-dd hh:mm:ss")));
         emit signal_updatePrintLog();
-        //qDebug("%s\n", jobMsg.title);
-        //qDebug("%s\n", jobMsg.options);
-        //qDebug("%s\n", jobMsg.copies);
-        //QDialog *dialog = new QDialog();
-        //dialog->setWindowTitle("prt_name = "+prt_name);
-        //dialog->show();
-        //qDebug("123", prt_name);
     }
 }
 

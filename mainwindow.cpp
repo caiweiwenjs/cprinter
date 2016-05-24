@@ -1,62 +1,115 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QLabel>
-#include <QListView>
-#include <QDialog>
-#include <QVector>
-#include <QString>
-#include "sqlhelper.h"
 #include "prtselectdialog.h"
 #include "cupsutil.h"
 #include "unixutil.h"
 #include "server.h"
+#include "upload.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    SqlHelper *sqlHelper = SqlHelper::GetInstance();
-    QVector<UserPrinter> userPrinters = sqlHelper->getUserPrinterByUserName(UnixUtil::getUserName());
+    //sql
+    sqlHelper = SqlHelper::GetInstance();
+    //printers
+    loadPrinters();
     for (auto row : userPrinters) {
         ui->listWidget->addItem(row.getPrinterName());
     }
-    //ui->tableWidget->setWindowTitle("QTableWidget & Item");
-    //ui->tableWidget->resize(350, 200);  //设置表格
-    slot_updatePrintLog();
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-void MainWindow::slot_updatePrintLog() {
-    SqlHelper *sqlHelper = SqlHelper::GetInstance();
-    QVector<PrintLog> printLogs = sqlHelper->getPrintLogByUserName(UnixUtil::getUserName());
+    //print logs
     QStringList header;
     ui->tableWidget->setColumnCount(10);
     ui->tableWidget->setRowCount(100);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableWidget->setEditTriggers(QTableWidget::NoEditTriggers);
-    header << "id" << "status" << "userName" << "printerName" << "fileName" << "title" << "options" << "copies" << "submitTime" << "printTime";
+    header << "ID" << "状态" << "用户名" << "打印机" << "文件名" << "标题" << "打印选项" << "份数" << "提交时间" << "打印时间";
     ui->tableWidget->setHorizontalHeaderLabels(header);
+    loadPrintLogs();
+    slot_updatePrintLog();
+    //timer
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(slot_timeout()));
+    timer->start(5000);
+}
+
+MainWindow::~MainWindow()
+{
+    delete timer;
+    delete ui;
+}
+
+void MainWindow::loadPrintLogs() {
+    printLogs = sqlHelper->getPrintLogByUserName(UnixUtil::getUserName());
+}
+
+void MainWindow::loadPrinters() {
+    userPrinters = sqlHelper->getUserPrinterByUserName(UnixUtil::getUserName());
+}
+
+
+void MainWindow::slot_updatePrintLog() {
     int sz = printLogs.size();
+    ui->tableWidget->clearContents();
     for (int i = 0;i < sz;i++) {
-        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(QString::number(printLogs[i].getId(), 10)));
-        ui->tableWidget->setItem(i, 1, new QTableWidgetItem(QString::number(printLogs[i].getStatus(), 10)));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem(printLogs[i].getUserName()));
-        ui->tableWidget->setItem(i, 3, new QTableWidgetItem(printLogs[i].getPrinterName()));
-        ui->tableWidget->setItem(i, 4, new QTableWidgetItem(printLogs[i].getFileName()));
-        ui->tableWidget->setItem(i, 5, new QTableWidgetItem(printLogs[i].getTitle()));
-        ui->tableWidget->setItem(i, 6, new QTableWidgetItem(printLogs[i].getOptions()));
-        ui->tableWidget->setItem(i, 7, new QTableWidgetItem(QString::number(printLogs[i].getCopies(), 10)));
-        ui->tableWidget->setItem(i, 8, new QTableWidgetItem(printLogs[i].getSubmitTime().toString("yyyy-MM-dd hh:mm:ss")));
-        ui->tableWidget->setItem(i, 9, new QTableWidgetItem(printLogs[i].getPrintTime().toString("yyyy-MM-dd hh:mm:ss")));
+        QTableWidgetItem * item;
+        item = new QTableWidgetItem(QString::number(printLogs[i].getId(), 10));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 0, item);
+        QString strStatus;
+        int status = printLogs[i].getStatus();
+        switch (status) {
+        case 0:
+            strStatus = "新提交";
+            break;
+        case 1:
+            strStatus = "通过";
+            break;
+        case 2:
+            strStatus = "回绝";
+            break;
+        case 3:
+            strStatus = "打印完成";
+            break;
+        default:
+            strStatus = "打印失败";
+        }
+        item = new QTableWidgetItem(strStatus);
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 1, item);
+        item = new QTableWidgetItem(printLogs[i].getUserName());
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 2, item);
+        item = new QTableWidgetItem(printLogs[i].getPrinterName());
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 3, item);
+        item = new QTableWidgetItem(printLogs[i].getFilePath());
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 4, item);
+        item = new QTableWidgetItem(printLogs[i].getTitle());
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 5, item);
+        item = new QTableWidgetItem(printLogs[i].getOptions());
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 6, item);
+        item = new QTableWidgetItem(QString::number(printLogs[i].getCopies(), 10));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 7, item);
+        item = new QTableWidgetItem(printLogs[i].getSubmitTime().toString("yyyy-MM-dd hh:mm:ss"));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 8, item);
+        item = new QTableWidgetItem(printLogs[i].getPrintTime().toString("yyyy-MM-dd hh:mm:ss"));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget->setItem(i, 9, item);
     }
     ui->tableWidget->show();
+}
+
+QString MainWindow::slot_uploadPDF(QString filename) {
+    Upload *upload = Upload::GetInstance();
+    return upload->upload(filename);
 }
 
 QString MainWindow::slot_getPrinterName(QString msg) {
@@ -68,6 +121,36 @@ QString MainWindow::slot_getPrinterName(QString msg) {
     return prt_name;
 }
 
+void MainWindow::slot_timeout() {
+    loadPrintLogs();
+    for (auto printLog : printLogs)
+        if (printLog.getStatus() == 1) {
+            if (printJob(printLog)) {
+                printLog.setStatus(3);
+            } else {
+                printLog.setStatus(4);
+            }
+            sqlHelper->updatePrintLog(printLog);
+        }
+    slot_updatePrintLog();
+}
+
+bool MainWindow::printJob(PrintLog &printLog) {
+    QString printerName = printLog.getPrinterName();
+    QString fileName = printLog.getFilePath();
+    QString title = printLog.getTitle();
+    QString str_options = printLog.getOptions();
+    cups_option_t *options;
+    int num_options = CupsUtil::parseOptions(str_options.toStdString().c_str(), &options);
+    int job_id = CupsUtil::printFile(printerName.toStdString().c_str(),
+                                     fileName.toStdString().c_str(),
+                                     title.toStdString().c_str(),
+                                     num_options, options);
+    CupsUtil::freeOptions(num_options, options);
+    printLog.setPrintTime(QDateTime::currentDateTime());
+    return (job_id != 0);
+}
+/*
 void MainWindow::on_pushButton_clicked()
 {
     QList <QTableWidgetItem *> ql = ui->tableWidget->selectedItems();
@@ -92,12 +175,7 @@ void MainWindow::on_pushButton_clicked()
         //select a row
     }
     //qDebug() << row;
-    /*
-    QDialog *dialog = new QDialog();
-    for (auto i : ql) {
-        dialog->setWindowTitle(i->text());
-        dialog->show();
-    }*/
     //int job_id = CupsUtil::printFile("Brother_HL-1208_Printer:4", "/home/cww/Desktop/test2", "my_title", 0, NULL);
     //qDebug() << job_id;
 }
+*/

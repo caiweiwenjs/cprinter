@@ -12,6 +12,7 @@ public:
     virtual void run();
 signals:
         QString signal_getPrinterName(QString msg);
+        QString signal_uploadPDF(QString filename);
         void signal_updatePrintLog();
 };
 

@@ -30,6 +30,7 @@ public:
     QVector<PrintLog> getPrintLogByUserName(QString userName);
     QVector<UserPrinter> getUserPrinterByUserName(QString userName);
     bool addPrintLog(const PrintLog &printLog);
+    bool updatePrintLog(const PrintLog &printLog); //update status and print time only
 };
 
 //table print_log
@@ -39,7 +40,7 @@ private:
     int status;
     QString userName;
     QString printerName;
-    QString fileName;
+    QString filePath;
     QString title;
     QString options;
     int copies;
@@ -47,13 +48,13 @@ private:
     QDateTime printTime;
 public:
     explicit PrintLog() {}
-    explicit PrintLog(int _id, int _status, QString _userName, QString _printerName, QString _fileName, QString _title, QString _options,
+    explicit PrintLog(int _id, int _status, QString _userName, QString _printerName, QString _filePath, QString _title, QString _options,
                         int _copies, QDateTime _submitTime, QDateTime _printTime) :
         id(_id),
         status(_status),
         userName(_userName),
         printerName(_printerName),
-        fileName(_fileName),
+        filePath(_filePath),
         title(_title),
         options(_options),
         copies(_copies),
@@ -68,8 +69,8 @@ public:
     QString getUserName() const { return userName; }
     QString getPrinterName() { return printerName; }
     QString getPrinterName() const { return printerName; }
-    QString getFileName() { return fileName; }
-    QString getFileName() const { return fileName; }
+    QString getFilePath() { return filePath; }
+    QString getFilePath() const { return filePath; }
     QString getTitle() { return title; }
     QString getTitle() const { return title; }
     QString getOptions() { return options; }
@@ -85,7 +86,7 @@ public:
     void setStatus(int status) { this->status = status; }
     void setUserName(QString userName) { this->userName = userName; }
     void setPrinterName(QString printerName) { this->printerName = printerName; }
-    void setFileName(QString fileName) { this->fileName = fileName; }
+    void setFilePath(QString filePath) { this->filePath = filePath; }
     void setTitle(QString title) { this->title = title; }
     void setOptions(QString options) { this->options = options; }
     void setCopies(int copies) { this->copies = copies; }
@@ -97,16 +98,20 @@ public:
 //table user_printer
 class UserPrinter {
 private:
+    int id;
     QString userName;
     QString printerName;
 public:
     explicit UserPrinter() {}
     explicit UserPrinter(QString _userName, QString _printerName) : userName(_userName), printerName(_printerName) {}
 
+    int getId() { return id; }
+    int getId() const { return id; }
     QString getUserName() { return userName; }
     QString getUserName() const { return userName; }
     QString getPrinterName() { return printerName;}
     QString getPrinterName() const { return printerName;}
+    void setId(int id) { this->id = id; }
     void setUserName(QString userName) { this->userName = userName; }
     void serPrinterName(QString printerName) { this->printerName = printerName;}
 };
