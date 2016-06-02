@@ -5,6 +5,9 @@
 #include "unixutil.h"
 #include "server.h"
 #include "upload.h"
+#include "common.h"
+#include <QProcess>
+#include <QProgressDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -33,6 +36,47 @@ MainWindow::MainWindow(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(slot_timeout()));
     timer->start(5000);
+
+    /*
+    int numFiles = 1000;
+    QProgressDialog progress("Copying files...", "Abort Copy", 0, numFiles, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.show();
+    for (int i = 0; i < numFiles; i++) {
+         progress.setValue(i);
+
+         if (progress.wasCanceled())
+             break;
+         QTime t;
+         t.start();
+         while(t.elapsed() < 1)
+             QCoreApplication::processEvents();
+         //sleep(10);
+         //int x = 10;
+         //for (int j = 0;j < 10000000;j++)
+         //    x = x * x *x;
+           //... copy one file
+     }
+     progress.setValue(numFiles);
+     */
+
+    /*
+    QProcess lp_cups;
+    //QDir dir;
+    //qDebug() << dir.currentPath();
+    lp_cups.start("./lp_cups",
+                  QStringList()
+                  << "Brother_HL-1208_Printer:4"
+                  << "/var/spool/cups-pdf/cww/test123.pdf"
+                  << "test123"
+                  << "PageSize=Letter number-up=1 Resolution=300dpi job-uuid=urn:uuid:b5f1f835-66cf-33cb-6c1d-46723bfcf20f job-originating-host-name=localhost date-time-at-creation= date-time-at-processing= time-at-creation=1464770976 time-at-processing=1464770976");
+    if (!lp_cups.waitForFinished())
+        qDebug() << "lp_cups error";
+    QByteArray result = lp_cups.readAll();
+    qDebug() << lp_cups.exitCode();
+    qDebug() << lp_cups.errorString();
+    qDebug() << result;
+    */
 }
 
 MainWindow::~MainWindow()
@@ -108,7 +152,7 @@ void MainWindow::slot_updatePrintLog() {
 }
 
 QString MainWindow::slot_uploadPDF(QString filename) {
-    Upload *upload = Upload::GetInstance();
+    Upload *upload = Upload::GetInstance(this);
     return upload->upload(filename);
 }
 
@@ -137,9 +181,13 @@ void MainWindow::slot_timeout() {
 
 bool MainWindow::printJob(PrintLog &printLog) {
     QString printerName = printLog.getPrinterName();
-    QString fileName = printLog.getFilePath();
+    QString fileName = Common::getDir() + printLog.getTitle() + Common::getExt();//printLog.getFilePath();
     QString title = printLog.getTitle();
     QString str_options = printLog.getOptions();
+    int job_id = CupsUtil::printFile(printerName, fileName, title, str_options);
+    printLog.setPrintTime(QDateTime::currentDateTime());
+    return (job_id != 0);
+    /*
     cups_option_t *options;
     int num_options = CupsUtil::parseOptions(str_options.toStdString().c_str(), &options);
     int job_id = CupsUtil::printFile(printerName.toStdString().c_str(),
@@ -147,8 +195,7 @@ bool MainWindow::printJob(PrintLog &printLog) {
                                      title.toStdString().c_str(),
                                      num_options, options);
     CupsUtil::freeOptions(num_options, options);
-    printLog.setPrintTime(QDateTime::currentDateTime());
-    return (job_id != 0);
+    return (job_id != 0);*/
 }
 /*
 void MainWindow::on_pushButton_clicked()

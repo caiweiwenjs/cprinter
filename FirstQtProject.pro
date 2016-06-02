@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     unixutil.cpp \
     codeengine.cpp \
     protocol.cpp \
-    upload.cpp
+    upload.cpp \
+    common.cpp
 
 HEADERS  += mainwindow.h \
     unixsocket.h \
@@ -37,7 +38,8 @@ HEADERS  += mainwindow.h \
     unixutil.h \
     codeengine.h \
     protocol.h \
-    upload.h
+    upload.h \
+    common.h
 
 FORMS    += mainwindow.ui \
     prtselectdialog.ui

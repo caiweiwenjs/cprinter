@@ -28,6 +28,9 @@ void Server::run() {
         us->recvMsg(fd, rbuf);
         JobMsg jobMsg(rbuf);
         QString filename = emit signal_uploadPDF(QString(jobMsg.title) + ".pdf");
+        if (filename.isEmpty()) { //discard upload pdf
+            continue;
+        }
         sqlHelper->addPrintLog(PrintLog(-1, 0, UnixUtil::getUserName(), prt_name, filename,
                                         QString(jobMsg.title), QString(jobMsg.options), QString(jobMsg.copies).toInt(),
                                         QDateTime::currentDateTime(),

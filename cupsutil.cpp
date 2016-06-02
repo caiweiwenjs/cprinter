@@ -2,6 +2,8 @@
 #include <cups/cups.h>
 #include <QVector>
 #include <QString>
+#include <QProcess>
+
 
 CupsUtil::CupsUtil()
 {
@@ -26,6 +28,18 @@ int CupsUtil::printFile(const char *name, const char *filename, const char *titl
                         int num_options, cups_option_t *options) {
     int job_id;
     job_id = cupsPrintFile(name, filename, title, num_options, options);
+    return job_id;
+}
+
+int CupsUtil::printFile(QString printerName, QString fileName, QString title, QString str_options) {
+    int job_id;
+    QProcess lp_cups;
+    lp_cups.start("./lp_cups", QStringList() << printerName << fileName << title << str_options);
+    if (!lp_cups.waitForFinished())
+        return 0;
+    QByteArray result = lp_cups.readAll();
+    job_id = result.toInt();
+    //qDebug() << job_id;
     return job_id;
 }
 

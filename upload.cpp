@@ -4,18 +4,21 @@
 #include <QFileInfo>
 #include <QDataStream>
 #include <QMessageBox>
+#include <QThread>
+#include <QCoreApplication>
 
 
-Upload *Upload::GetInstance() {
-    static Upload upload;
+Upload *Upload::GetInstance(QWidget *parent) {
+    static Upload upload(parent);
     return &upload;
 }
 
-Upload::Upload(QObject *parent) :
-    QObject(parent)
+Upload::Upload(QWidget *parent) :
+    QWidget(parent)
 {
-     uploadManager = new QNetworkAccessManager(this);
-    //progressDialog = new QProgressDialog();
+    uploadManager = new QNetworkAccessManager(this);
+    //progressDialog = new QProgressDialog("upload file", "cancel", 0, 100, parent);
+    //progressDialog->setWindowModality(Qt::WindowModal);
 }
 
 void Upload::replyFinish() {
@@ -72,21 +75,41 @@ void Upload::onUploadProgress(qint64 bytesSent, qint64 bytesTotal) {
 }
 
 QString Upload::upload(QString filename) {
-    m_buf = nullptr;
+    //waiting for cups-pdf generate pdf file
+    int loop_cnt = 1000;
+    QProgressDialog progress("正在生成pdf文件...", "停止", 0, loop_cnt, this);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.show();
+    bool isCanceled = false;
+    for (int i = 0; i < loop_cnt; i++) {
+         progress.setValue(i);
+         if (progress.wasCanceled()) {
+             isCanceled = true;
+             break;
+         }
+        //sleep
+         QTime t;
+         t.start();
+         while(t.elapsed() < 2)
+             QCoreApplication::processEvents();
+     }
+     progress.setValue(loop_cnt);
+    if (isCanceled)
+        return QString();
 
-    //qDebug() << DIR + filename;
-    QFile file(DIR + filename);
-    //qDebug() << file.open(QIODevice::ReadOnly);
+    m_buf = nullptr;
+    QFile file(Common::getDir() + filename);
+    file.open(QIODevice::ReadOnly);
     int file_len = file.size();
     QDataStream in(&file);
     m_buf = new char[file_len];
-    //qDebug() << in.readRawData(m_buf, file_len);
+    in.readRawData(m_buf, file_len);
     file.close();
 
     //qDebug() << file_len;
-    QString rfn = UnixUtil::getUserName() + QString::number(QDateTime::currentMSecsSinceEpoch()) +".pdf";
+    QString rfn = UnixUtil::getUserName() + QString::number(QDateTime::currentMSecsSinceEpoch()) + Common::getExt();
     //qDebug() << URL + "?filename=" + rfn;
-    QNetworkRequest request(QUrl(URL + "?filename=" + rfn));
+    QNetworkRequest request(QUrl(Common::getUrl() + "?filename=" + rfn));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
     QByteArray arr = QByteArray(m_buf, file_len);
     reply = uploadManager->post(request, arr);
